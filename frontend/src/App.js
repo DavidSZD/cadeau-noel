@@ -25,13 +25,14 @@ function App() {
     const { relation, age, interests, budget } = formData;
     let prompt = `En tant qu'expert en cadeaux de Noël, suggère-moi 4 idées de cadeaux originales et personnalisées pour ${relation} qui a ${age} ans.`;
     prompt += `\nCentres d'intérêt : ${interests}`;
-    prompt += `\nBudget : ${budget}`;
+    prompt += `\nBudget : ${budget} (IMPORTANT: Ne suggère que des cadeaux strictement dans cette fourchette de prix)`;
     
     if (previousSuggestions?.length > 0) {
       prompt += "\nVoici les suggestions déjà faites (à éviter) : " + previousSuggestions.join(", ");
     }
     
-    prompt += "\nRéponds uniquement en JSON avec ce format :\n[{\"name\": \"Nom du cadeau\", \"description\": \"Description détaillée\", \"price\": \"Prix approximatif\"}]";
+    prompt += "\nPour chaque suggestion, indique obligatoirement où on peut l'acheter (magasin physique ou site web).";
+    prompt += "\nRéponds uniquement en JSON avec ce format :\n[{\"name\": \"Nom du cadeau\", \"description\": \"Description détaillée\", \"price\": \"Prix approximatif\", \"where\": \"Où l'acheter\"}]";
     return prompt;
   };
 
@@ -105,8 +106,15 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="md">
-        <Box sx={{ my: 4 }}>
+      <Container maxWidth="md" sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        px: { xs: 2, sm: 3, md: 4 } // Responsive padding
+      }}>
+        <Box sx={{ width: '100%', my: 4 }}>
           {allResults.length > 0 ? (
             <GiftResults
               allResults={allResults}

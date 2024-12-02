@@ -23,10 +23,14 @@ const StyledCard = styled(Card)(({ theme }) => ({
 }));
 
 const BackButton = styled(Button)(({ theme }) => ({
-  position: 'fixed',
-  top: 20,
-  left: 20,
+  position: 'absolute',
+  top: { xs: 10, sm: 20 },
+  left: { xs: 10, sm: 20 },
   zIndex: 1000,
+  '@media (max-width: 600px)': {
+    fontSize: '0.875rem',
+    padding: '6px 12px',
+  }
 }));
 
 const GiftResults = ({ allResults, onBack, onGenerateMore }) => {
