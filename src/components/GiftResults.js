@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -7,6 +7,7 @@ import {
   Typography,
   Grid,
   styled,
+  CircularProgress
 } from '@mui/material';
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -34,6 +35,8 @@ const BackButton = styled(Button)(({ theme }) => ({
 }));
 
 const GiftResults = ({ allResults, onBack, onGenerateMore }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   let allGiftList = [];
   try {
     allGiftList = allResults.flatMap(result => {
@@ -44,6 +47,15 @@ const GiftResults = ({ allResults, onBack, onGenerateMore }) => {
   } catch (error) {
     console.error('Error parsing results:', error);
   }
+
+  const handleGenerateMore = async () => {
+    setIsLoading(true);
+    try {
+      await onGenerateMore();
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Box sx={{ mt: 4, pb: 10 }}>
@@ -86,10 +98,35 @@ const GiftResults = ({ allResults, onBack, onGenerateMore }) => {
         <Button
           variant="contained"
           color="secondary"
-          onClick={onGenerateMore}
-          sx={{ minWidth: 200 }}
+          onClick={handleGenerateMore}
+          disabled={isLoading}
+          sx={{ 
+            minWidth: 200, 
+            position: 'relative',
+            '&:disabled': {
+              backgroundColor: 'rgba(0, 0, 0, 0.12)',
+              color: 'rgba(0, 0, 0, 0.26)'
+            }
+          }}
         >
-          Générer encore
+          {isLoading ? (
+            <>
+              <CircularProgress 
+                size={24} 
+                sx={{ 
+                  position: 'absolute', 
+                  top: '50%', 
+                  left: '50%', 
+                  marginTop: '-12px', 
+                  marginLeft: '-12px',
+                  color: 'secondary.main'
+                }} 
+              />
+              Génération en cours...
+            </>
+          ) : (
+            'Générer encore'
+          )}
         </Button>
       </Box>
     </Box>
