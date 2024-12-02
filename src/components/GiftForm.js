@@ -18,14 +18,23 @@ const QuestionTypography = styled(Typography)({
 });
 
 const StyledPaper = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(4),
-  marginTop: theme.spacing(1),
+  paddingLeft: theme.spacing(4),
+  paddingRight: theme.spacing(4),
+  paddingTop: theme.spacing(1),
+  paddingBottom: theme.spacing(4),
+  marginTop: theme.spacing(0.5),
   background: 'linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%)',
   borderRadius: theme.spacing(2),
   boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
   width: '100%',
   maxWidth: '1000px',
   margin: '0 auto',
+  [theme.breakpoints.down('sm')]: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+    paddingTop: theme.spacing(0),
+    marginTop: theme.spacing(0),
+  }
 }));
 
 const GiftForm = ({ onSubmit, initialData }) => {
@@ -92,7 +101,7 @@ const GiftForm = ({ onSubmit, initialData }) => {
             fontWeight: 'bold',
             mb: 4,
             textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
-            mt: { xs: 2, md: 4 }
+            mt: { xs: 0, md: 4 }
           }}>
             Trouvez le Cadeau de Noël Parfait 🎁
           </Typography>
@@ -175,21 +184,10 @@ const GiftForm = ({ onSubmit, initialData }) => {
             <QuestionTypography variant="subtitle1">
               Quel est votre budget ?
             </QuestionTypography>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.noMaxBudget}
-                    onChange={handleNoMaxBudgetChange}
-                    color="error"
-                  />
-                }
-                label="Sans maximum"
-              />
-            </Box>
             <Slider
               value={formData.budget}
               onChange={handleBudgetChange}
+              valueLabelFormat={(value) => (formData.noMaxBudget && value === 100 ? 'illimité' : `${value}€`)}
               valueLabelDisplay="on"
               min={0}
               max={100}
@@ -199,7 +197,7 @@ const GiftForm = ({ onSubmit, initialData }) => {
                 { value: 25, label: '25€' },
                 { value: 50, label: '50€' },
                 { value: 75, label: '75€' },
-                { value: 100, label: '100€' }
+                { value: 100, label: formData.noMaxBudget ? 'illimité' : '100€' }
               ]}
               sx={{
                 '& .MuiSlider-thumb': {
@@ -219,8 +217,20 @@ const GiftForm = ({ onSubmit, initialData }) => {
                 },
               }}
             />
+            <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.noMaxBudget}
+                    onChange={handleNoMaxBudgetChange}
+                    color="error"
+                  />
+                }
+                label="Sans maximum"
+              />
+            </Box>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-              Budget : {formData.budget[0]}€{formData.noMaxBudget ? ' et plus' : ` - ${formData.budget[1]}€`}
+              Budget : {formData.budget[0]}€{formData.noMaxBudget ? ' illimité' : ` - ${formData.budget[1]}€`}
             </Typography>
           </Box>
 
