@@ -1,78 +1,73 @@
-import React, { useState } from 'react';
 import {
   Box,
   TextField,
   Button,
   Typography,
-  Paper,
   Slider,
   styled,
-  CircularProgress
+  CircularProgress,
+  Switch,
+  FormControlLabel
 } from '@mui/material';
+import React, { useState, useEffect } from 'react';
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
+const QuestionTypography = styled(Typography)({
+  marginBottom: '8px',
+  color: '#333',
+  fontWeight: 500,
+});
+
+const StyledPaper = styled(Box)(({ theme }) => ({
   padding: theme.spacing(4),
   marginTop: theme.spacing(1),
   background: 'linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%)',
-  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-  borderRadius: '15px',
+  borderRadius: theme.spacing(2),
+  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
   width: '100%',
-  maxWidth: { xs: '100%', md: '900px' },
+  maxWidth: '1000px',
   margin: '0 auto',
 }));
 
-const QuestionTypography = styled(Typography)(({ theme }) => ({
-  marginBottom: theme.spacing(1),
-  color: '#333',
-  fontWeight: 500,
-}));
-
-const budgetValues = [0, 10, 20, 50, 100, 'Illimité'];
-
-const GiftForm = ({ onSubmit }) => {
-  const [formData, setFormData] = useState({
-    relation: '',
-    age: '',
-    interests: '',
-    budgetRange: [1, 3],
+const GiftForm = ({ onSubmit, initialData }) => {
+  const [formData, setFormData] = useState(() => {
+    const savedData = localStorage.getItem('giftFormData');
+    return savedData ? JSON.parse(savedData) : initialData || {
+      relation: '',
+      age: '',
+      interests: '',
+      budget: [0, 100],
+      noMaxBudget: false
+    };
   });
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  useEffect(() => {
+    localStorage.setItem('giftFormData', JSON.stringify(formData));
+  }, [formData]);
 
-  const handleBudgetChange = (event, newValue) => {
-    setFormData({
-      ...formData,
-      budgetRange: newValue,
-    });
-  };
-
-  const getBudgetLabel = (value) => {
-    return value === 5 ? 'Illimité' : `${budgetValues[value]}€`;
-  };
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    const minBudget = getBudgetLabel(formData.budgetRange[0]);
-    const maxBudget = getBudgetLabel(formData.budgetRange[1]);
-    const budgetString = minBudget === maxBudget 
-      ? minBudget 
-      : `${minBudget} - ${maxBudget}`;
+    setLoading(true);
+    const budgetString = formData.noMaxBudget 
+      ? `important suggere seulement des cadeau qui coute au minimum ${formData.budget[0]}€ et je n'ai pas de budget maximum`
+      : `${formData.budget[0]}€ - ${formData.budget[1]}€`;
+    await onSubmit({ ...formData, budget: budgetString });
+    setLoading(false);
+  };
 
-    try {
-      await onSubmit({
-        ...formData,
-        budget: budgetString,
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const handleBudgetChange = (event, newValue) => {
+    setFormData(prev => ({
+      ...prev,
+      budget: [newValue[0], prev.noMaxBudget ? prev.budget[1] : newValue[1]]
+    }));
+  };
+
+  const handleNoMaxBudgetChange = (event) => {
+    setFormData(prev => ({
+      ...prev,
+      noMaxBudget: event.target.checked
+    }));
   };
 
   return (
@@ -93,7 +88,7 @@ const GiftForm = ({ onSubmit }) => {
           '& > :not(style)': { m: 2 }
         }}>
           <Typography variant="h4" gutterBottom align="center" sx={{ 
-            color: '#c41e3a',
+            color: '#D32F2F',
             fontWeight: 'bold',
             mb: 4,
             textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
@@ -109,10 +104,19 @@ const GiftForm = ({ onSubmit }) => {
               fullWidth
               required
               label="Votre relation avec cette personne"
-              name="relation"
               value={formData.relation}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
               placeholder="Ex: Mon meilleur ami, Ma mère, Mon collègue..."
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: '#D32F2F',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#D32F2F',
+                  },
+                },
+              }}
             />
           </Box>
 
@@ -124,10 +128,19 @@ const GiftForm = ({ onSubmit }) => {
               fullWidth
               required
               label="Âge"
-              name="age"
               type="number"
               value={formData.age}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: '#D32F2F',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#D32F2F',
+                  },
+                },
+              }}
             />
           </Box>
 
@@ -139,88 +152,103 @@ const GiftForm = ({ onSubmit }) => {
               fullWidth
               required
               label="Centres d'intérêt"
-              name="interests"
               multiline
               rows={3}
               value={formData.interests}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, interests: e.target.value })}
               placeholder="Ex: Passionné(e) de lecture, aime la cuisine italienne, fan de jeux vidéo..."
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '&:hover fieldset': {
+                    borderColor: '#D32F2F',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#D32F2F',
+                  },
+                },
+              }}
             />
           </Box>
 
-          <Box sx={{ 
-            width: '100%',
-            mb: 4,
-            textAlign: 'center',
-            '& .MuiSlider-markLabel': {
-              transform: 'translateX(-50%)',
-            }
-          }}>
-            <QuestionTypography variant="subtitle1" sx={{ textAlign: 'left' }}>
+          <Box sx={{ width: '100%', mb: 2 }}>
+            <QuestionTypography variant="subtitle1">
               Quel est votre budget ?
             </QuestionTypography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={formData.noMaxBudget}
+                    onChange={handleNoMaxBudgetChange}
+                    color="error"
+                  />
+                }
+                label="Sans maximum"
+              />
+            </Box>
             <Slider
-              value={formData.budgetRange}
+              value={formData.budget}
               onChange={handleBudgetChange}
-              step={1}
+              valueLabelDisplay="on"
               min={0}
-              max={5}
-              marks={[0,1,2,3,4,5].map(value => ({
-                value,
-                label: getBudgetLabel(value)
-              }))}
+              max={100}
+              step={5}
+              marks={[
+                { value: 0, label: '0€' },
+                { value: 25, label: '25€' },
+                { value: 50, label: '50€' },
+                { value: 75, label: '75€' },
+                { value: 100, label: '100€' }
+              ]}
               sx={{
-                color: '#228B22',
                 '& .MuiSlider-thumb': {
-                  backgroundColor: '#ffffff',
-                  border: '2px solid #228B22',
-                },
-                '& .MuiSlider-mark': {
-                  backgroundColor: '#c41e3a',
-                },
-                '& .MuiSlider-rail': {
-                  opacity: 0.8,
-                  backgroundColor: '#c41e3a',
+                  backgroundColor: '#D32F2F',
                 },
                 '& .MuiSlider-track': {
-                  opacity: 0.8,
-                  backgroundColor: '#228B22',
+                  backgroundColor: '#D32F2F',
+                },
+                '& .MuiSlider-rail': {
+                  backgroundColor: '#ffcdd2',
+                },
+                '& .MuiSlider-mark': {
+                  backgroundColor: '#D32F2F',
                 },
                 '& .MuiSlider-markLabel': {
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
+                  color: 'text.secondary',
                 },
               }}
             />
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              Budget : {formData.budget[0]}€{formData.noMaxBudget ? ' et plus' : ` - ${formData.budget[1]}€`}
+            </Typography>
           </Box>
 
-          <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={isLoading}
-              sx={{
-                mt: 2,
-                py: 1.5,
-                px: 4,
-                backgroundColor: '#c41e3a',
-                '&:hover': {
-                  backgroundColor: '#a01830',
-                },
-                boxShadow: '0 4px 12px rgba(196,30,58,0.3)',
-                borderRadius: '25px',
-                width: 'auto',
-                minWidth: '200px',
-              }}
-            >
-              {isLoading ? (
-                <CircularProgress size={24} sx={{ color: 'white' }} />
-              ) : (
-                'Lancer la Recherche 🔍'
-              )}
-            </Button>
-          </Box>
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={loading}
+            sx={{
+              mt: 2,
+              py: 1.5,
+              px: 4,
+              backgroundColor: '#2e7d32',
+              '&:hover': {
+                backgroundColor: '#1b5e20',
+              },
+              boxShadow: '0 4px 12px rgba(46,125,50,0.3)',
+              borderRadius: '25px',
+              width: 'auto',
+              minWidth: '200px',
+              textTransform: 'none',
+              fontSize: '1.1rem',
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Lancer la recherche'
+            )}
+          </Button>
         </Box>
       </StyledPaper>
     </Box>
