@@ -75,9 +75,9 @@ const GiftForm = ({ onSubmit, initialData }) => {
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center',
-      minHeight: '100%',
+      minHeight: '100vh',
       width: '100%',
-      py: 4
+      py: 0
     }}>
       <StyledPaper elevation={3}>
         <Box component="form" onSubmit={handleSubmit} sx={{ 
@@ -91,7 +91,8 @@ const GiftForm = ({ onSubmit, initialData }) => {
             color: '#D32F2F',
             fontWeight: 'bold',
             mb: 4,
-            textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
+            textShadow: '2px 2px 4px rgba(0,0,0,0.1)',
+            mt: { xs: 2, md: 4 }
           }}>
             Trouvez le Cadeau de Noël Parfait 🎁
           </Typography>
