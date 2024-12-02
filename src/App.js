@@ -111,25 +111,25 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container 
-        maxWidth="md" 
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '100%',
-          p: { xs: 1, sm: 2, md: 3 }
-        }}
-      >
-        <Box sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'flex-start',
-          minHeight: '100vh',
-          width: '100%',
-          pt: 0
-        }}>
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        minHeight: '100vh',
+        width: '100%',
+        pt: 0
+      }}>
+        <Container 
+          maxWidth="md" 
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            p: { xs: 1, sm: 2, md: 3 }
+          }}
+        >
           {allResults.length > 0 ? (
             <GiftResults
               allResults={allResults}
@@ -137,10 +137,10 @@ function App() {
               onGenerateMore={handleGenerateMore}
             />
           ) : (
-            <GiftForm onSubmit={handleSubmit} />
+            <GiftForm onSubmit={handleSubmit} initialData={lastFormData} />
           )}
-        </Box>
-      </Container>
+        </Container>
+      </Box>
     </ThemeProvider>
   );
 }
