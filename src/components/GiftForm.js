@@ -181,7 +181,7 @@ const GiftForm = ({ onSubmit, initialData }) => {
           </Box>
 
           <Box sx={{ width: '100%', mb: 2 }}>
-            <QuestionTypography variant="subtitle1">
+            <QuestionTypography variant="subtitle1" sx={{ mb: 4 }}>
               Quel est votre budget ?
             </QuestionTypography>
             <Slider
