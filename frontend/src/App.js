@@ -111,25 +111,25 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        width: '100%',
-        p: 2
-      }}>
-        <Container 
-          maxWidth="md" 
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            width: '100%',
-            p: { xs: 1, sm: 2, md: 3 }
-          }}
-        >
+      <Container 
+        maxWidth="md" 
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          p: { xs: 1, sm: 2, md: 3 }
+        }}
+      >
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          minHeight: '100vh',
+          width: '100%',
+          pt: 0
+        }}>
           {allResults.length > 0 ? (
             <GiftResults
               allResults={allResults}
@@ -139,8 +139,8 @@ function App() {
           ) : (
             <GiftForm onSubmit={handleSubmit} />
           )}
-        </Container>
-      </Box>
+        </Box>
+      </Container>
     </ThemeProvider>
   );
 }

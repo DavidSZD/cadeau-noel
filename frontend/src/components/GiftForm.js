@@ -7,6 +7,7 @@ import {
   Paper,
   Slider,
   styled,
+  CircularProgress
 } from '@mui/material';
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -20,6 +21,12 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   margin: '0 auto',
 }));
 
+const QuestionTypography = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  color: '#333',
+  fontWeight: 500,
+}));
+
 const budgetValues = [0, 10, 20, 50, 100, 'Illimité'];
 
 const GiftForm = ({ onSubmit }) => {
@@ -27,8 +34,9 @@ const GiftForm = ({ onSubmit }) => {
     relation: '',
     age: '',
     interests: '',
-    budgetRange: [1, 3], // Par défaut: 10€ - 50€
+    budgetRange: [1, 3],
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -48,18 +56,23 @@ const GiftForm = ({ onSubmit }) => {
     return value === 5 ? 'Illimité' : `${budgetValues[value]}€`;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     const minBudget = getBudgetLabel(formData.budgetRange[0]);
     const maxBudget = getBudgetLabel(formData.budgetRange[1]);
     const budgetString = minBudget === maxBudget 
       ? minBudget 
       : `${minBudget} - ${maxBudget}`;
 
-    onSubmit({
-      ...formData,
-      budget: budgetString,
-    });
+    try {
+      await onSubmit({
+        ...formData,
+        budget: budgetString,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -88,58 +101,64 @@ const GiftForm = ({ onSubmit }) => {
             Trouvez le Cadeau de Noël Parfait 🎁
           </Typography>
 
-          <TextField
-            fullWidth
-            required
-            label="Quelle est votre relation avec cette personne ?"
-            name="relation"
-            value={formData.relation}
-            onChange={handleChange}
-            sx={{ mb: 3 }}
-            placeholder="Ex: Mon meilleur ami, Ma mère, Mon collègue..."
-          />
+          <Box sx={{ width: '100%', mb: 2 }}>
+            <QuestionTypography variant="subtitle1">
+              Pour qui cherchez-vous un cadeau ?
+            </QuestionTypography>
+            <TextField
+              fullWidth
+              required
+              label="Votre relation avec cette personne"
+              name="relation"
+              value={formData.relation}
+              onChange={handleChange}
+              placeholder="Ex: Mon meilleur ami, Ma mère, Mon collègue..."
+            />
+          </Box>
 
-          <TextField
-            fullWidth
-            required
-            label="Âge"
-            name="age"
-            type="number"
-            value={formData.age}
-            onChange={handleChange}
-            sx={{ mb: 3 }}
-          />
+          <Box sx={{ width: '100%', mb: 2 }}>
+            <QuestionTypography variant="subtitle1">
+              Quel âge a cette personne ?
+            </QuestionTypography>
+            <TextField
+              fullWidth
+              required
+              label="Âge"
+              name="age"
+              type="number"
+              value={formData.age}
+              onChange={handleChange}
+            />
+          </Box>
 
-          <TextField
-            fullWidth
-            required
-            label="Centres d'intérêt"
-            name="interests"
-            multiline
-            rows={3}
-            value={formData.interests}
-            onChange={handleChange}
-            sx={{ mb: 4 }}
-            placeholder="Ex: Passionné(e) de lecture, aime la cuisine italienne, fan de jeux vidéo..."
-          />
+          <Box sx={{ width: '100%', mb: 2 }}>
+            <QuestionTypography variant="subtitle1">
+              Quels sont ses centres d'intérêt ?
+            </QuestionTypography>
+            <TextField
+              fullWidth
+              required
+              label="Centres d'intérêt"
+              name="interests"
+              multiline
+              rows={3}
+              value={formData.interests}
+              onChange={handleChange}
+              placeholder="Ex: Passionné(e) de lecture, aime la cuisine italienne, fan de jeux vidéo..."
+            />
+          </Box>
 
           <Box sx={{ 
-            mb: 4, 
-            width: '100%',  
-            margin: '0 auto',
+            width: '100%',
+            mb: 4,
             textAlign: 'center',
             '& .MuiSlider-markLabel': {
               transform: 'translateX(-50%)',
             }
           }}>
-            <Typography variant="h6" gutterBottom sx={{ 
-              mb: 3,
-              color: '#c41e3a',
-              fontWeight: 'bold',
-              textAlign: 'center'
-            }}>
-              Budget
-            </Typography>
+            <QuestionTypography variant="subtitle1" sx={{ textAlign: 'left' }}>
+              Quel est votre budget ?
+            </QuestionTypography>
             <Slider
               value={formData.budgetRange}
               onChange={handleBudgetChange}
@@ -151,19 +170,21 @@ const GiftForm = ({ onSubmit }) => {
                 label: getBudgetLabel(value)
               }))}
               sx={{
-                color: '#c41e3a',
+                color: '#228B22',
                 '& .MuiSlider-thumb': {
                   backgroundColor: '#ffffff',
-                  border: '2px solid #c41e3a',
+                  border: '2px solid #228B22',
                 },
                 '& .MuiSlider-mark': {
                   backgroundColor: '#c41e3a',
                 },
                 '& .MuiSlider-rail': {
                   opacity: 0.8,
+                  backgroundColor: '#c41e3a',
                 },
                 '& .MuiSlider-track': {
                   opacity: 0.8,
+                  backgroundColor: '#228B22',
                 },
                 '& .MuiSlider-markLabel': {
                   fontSize: '0.875rem',
@@ -173,11 +194,12 @@ const GiftForm = ({ onSubmit }) => {
             />
           </Box>
 
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
             <Button
               type="submit"
               variant="contained"
               size="large"
+              disabled={isLoading}
               sx={{
                 mt: 2,
                 py: 1.5,
@@ -189,9 +211,14 @@ const GiftForm = ({ onSubmit }) => {
                 boxShadow: '0 4px 12px rgba(196,30,58,0.3)',
                 borderRadius: '25px',
                 width: 'auto',
+                minWidth: '200px',
               }}
             >
-              Lancer la Recherche 🔍
+              {isLoading ? (
+                <CircularProgress size={24} sx={{ color: 'white' }} />
+              ) : (
+                'Lancer la Recherche 🔍'
+              )}
             </Button>
           </Box>
         </Box>
