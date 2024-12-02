@@ -55,7 +55,7 @@ const GiftResults = ({ allResults, onBack, onGenerateMore }) => {
         ← Retour
       </BackButton>
 
-      <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ color: '#c41e3a', mt: 4 }}>
+      <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ color: '#c41e3a', mt: 6 }}>
         Suggestions de Cadeaux de Noël 🎁
       </Typography>
 

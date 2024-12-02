@@ -24,32 +24,35 @@ function App() {
   const generatePrompt = (formData, previousSuggestions) => {
     const { relation, age, interests, budget } = formData;
     let prompt = `En tant qu'expert en cadeaux de Noël, suggère-moi 4 idées de cadeaux originales et personnalisées pour ${relation} qui a ${age} ans.`;
-    prompt += `\nCentres d'intérêt : ${interests}`;
-    prompt += `\nBudget : ${budget} (IMPORTANT: Ne suggère que des cadeaux strictement dans cette fourchette de prix)`;
+    prompt += `\nVoici ses centres d'intérêts : ${interests}`;
+    prompt += `\n et important suggere seulement des cadeau qui rentre dans cette fourchette de prix : ${budget}`;
     
     if (previousSuggestions?.length > 0) {
       prompt += "\nVoici les suggestions déjà faites (à éviter) : " + previousSuggestions.join(", ");
     }
     
-    prompt += "\nPour chaque suggestion, indique obligatoirement où on peut l'acheter (magasin physique ou site web).";
+    prompt += "\nPour chaque suggestion, indique obligatoirement plusieurs endroit où on peut l'acheter et prefere les endroit les plus connu et fiable (contexte ne propose pas des endroit americains je suis de france)";
     prompt += "\nRéponds uniquement en JSON avec ce format :\n[{\"name\": \"Nom du cadeau\", \"description\": \"Description détaillée\", \"price\": \"Prix approximatif\", \"where\": \"Où l'acheter\"}]";
     return prompt;
   };
 
   const handleSubmit = async (formData) => {
+    const previousSuggestions = allResults.flatMap(result => {
+      try {
+        const content = result.choices?.[0]?.message?.content || '';
+        const jsonContent = JSON.parse(content.replace(/```json\n|\n```/g, ''));
+        return Array.isArray(jsonContent) ? jsonContent.map(item => item.name) : [];
+      } catch {
+        return [];
+      }
+    });
+
+    const prompt = generatePrompt(formData, previousSuggestions);
+    console.log('Budget envoyé:', formData.budget);
+    console.log('Prompt envoyé:', prompt);
     try {
       setLastFormData(formData);
       
-      const previousSuggestions = allResults.flatMap(result => {
-        try {
-          const content = result.choices?.[0]?.message?.content || '';
-          const jsonContent = JSON.parse(content.replace(/```json\n|\n```/g, ''));
-          return Array.isArray(jsonContent) ? jsonContent.map(item => item.name) : [];
-        } catch {
-          return [];
-        }
-      });
-
       const response = await fetch('https://cablyai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -61,7 +64,7 @@ function App() {
           messages: [
             {
               role: 'user',
-              content: generatePrompt(formData, previousSuggestions)
+              content: prompt
             }
           ],
           temperature: 0.7,
@@ -94,7 +97,9 @@ function App() {
 
   const handleBack = () => {
     setAllResults([]);
-    setLastFormData(null);
+    if (lastFormData) {
+      setLastFormData(lastFormData);
+    }
   };
 
   const handleGenerateMore = async () => {
@@ -106,15 +111,25 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="md" sx={{ 
-        display: 'flex', 
+      <Box sx={{
+        display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100vh',
-        px: { xs: 2, sm: 3, md: 4 } // Responsive padding
+        width: '100%',
+        p: 2
       }}>
-        <Box sx={{ width: '100%', my: 4 }}>
+        <Container 
+          maxWidth="md" 
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            width: '100%',
+            p: { xs: 1, sm: 2, md: 3 }
+          }}
+        >
           {allResults.length > 0 ? (
             <GiftResults
               allResults={allResults}
@@ -124,8 +139,8 @@ function App() {
           ) : (
             <GiftForm onSubmit={handleSubmit} />
           )}
-        </Box>
-      </Container>
+        </Container>
+      </Box>
     </ThemeProvider>
   );
 }
