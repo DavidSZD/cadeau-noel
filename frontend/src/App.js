@@ -23,7 +23,7 @@ function App() {
 
   const generatePrompt = (formData, previousSuggestions) => {
     const { relation, age, interests, budget } = formData;
-    let prompt = `En tant qu'expert en cadeaux de Noël, suggère-moi 3 idées de cadeaux originales et personnalisées pour ${relation} qui a ${age} ans.`;
+    let prompt = `En tant qu'expert en cadeaux de Noël, suggère-moi 4 idées de cadeaux originales et personnalisées pour ${relation} qui a ${age} ans.`;
     prompt += `\nCentres d'intérêt : ${interests}`;
     prompt += `\nBudget : ${budget}`;
     
@@ -49,14 +49,14 @@ function App() {
         }
       });
 
-      const response = await fetch('https://api.cably.ai/v1/chat/completions', {
+      const response = await fetch('https://cablyai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${CABLYAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'gpt-4',
+          model: 'gpt-4o',
           messages: [
             {
               role: 'user',
@@ -67,10 +67,27 @@ function App() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
+      if (!data.choices?.[0]?.message?.content) {
+        throw new Error('Invalid response format from API');
+      }
+
+      try {
+        // Vérifie que le contenu peut être parsé en JSON
+        const content = data.choices[0].message.content;
+        JSON.parse(content.replace(/```json\n|\n```/g, ''));
+      } catch (error) {
+        throw new Error('Invalid JSON in API response');
+      }
+
       setAllResults(prev => [...prev, data]);
     } catch (error) {
       console.error('Error:', error);
+      alert('Une erreur est survenue lors de la génération des suggestions. Veuillez réessayer.');
     }
   };
 
